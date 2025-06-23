@@ -37,17 +37,17 @@ public class PostController {
             @RequestParam(defaultValue = "") String content
     ) {
         if( title.isBlank() ) {
-            return getWriteFormHtml(title,content,"제목을 입력해주세요");
+            return getWriteFormHtml("title",title,content,"제목을 입력해주세요");
         } else if( content.isBlank() ) {
-            return getWriteFormHtml(title,content,"내용을 입력해주세요");
+            return getWriteFormHtml("content",title,content,"내용을 입력해주세요");
         } else if( title.length() < 2 ) {
-            return getWriteFormHtml(title,content,"제목은 2글자 이상 입력해 주세요.");
+            return getWriteFormHtml("title",title,content,"제목은 2글자 이상 입력해 주세요.");
         } else if( content.length() < 2 ) {
-            return getWriteFormHtml(title,content,"내용은 2글자 이상 입력해 주세요.");
+            return getWriteFormHtml("content",title,content,"내용은 2글자 이상 입력해 주세요.");
         } else if( content.length() > 100 ) {
-            return getWriteFormHtml(title,content,"내용은 100글자 이하로 입력해 주세요.");
+            return getWriteFormHtml("content",title,content,"내용은 100글자 이하로 입력해 주세요.");
         } else if( title.length() > 10 ) {
-            return getWriteFormHtml(title,content,"제목은 10글자 이하로 입력해 주세요.");
+            return getWriteFormHtml("title",title,content,"제목은 10글자 이하로 입력해 주세요.");
         }
 
 
@@ -58,20 +58,35 @@ public class PostController {
 
 
     public String getWriteFormHtml() {
-        return getWriteFormHtml("","","");
+        return getWriteFormHtml("","","","");
     }
 
 
-    public String getWriteFormHtml(String title, String content,String errorMessage) {
+    public String getWriteFormHtml(String errorFieldName, String title, String content,String errorMessage) {
         return """
                 <h1>%s</h1>
                 <form method="POST" action="doWrite">
-                  <input type="text" name="title" placeholder="제목" value="%s">
+                  <input type="text" name="title" placeholder="제목" value="%s" autofocus>
                   <br>
                   <textarea name="content" placeholder="내용">%s</textarea>
                   <br>
                   <input type="submit" value="작성">
                 </form>
-                """.formatted(errorMessage ,title, content);
+                
+                <script>
+                    
+                    const errorFieldName = '%s';
+                    
+                    if(errorFieldName.length > 0 ) {
+                        // 모든 폼을 다 긁어와
+                        const forms = document.querySelectorAll("form");
+                        // 마지막 폼
+                        const lastForm = forms[forms.length - 1];
+                        //focus
+                        lastForm[errorFieldName].focus();               
+                    }
+                </script>
+                
+                """.formatted(errorMessage ,title, content, errorFieldName);
     }
 }
