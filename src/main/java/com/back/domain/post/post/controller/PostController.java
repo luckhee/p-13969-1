@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.stream.Collectors;
+
 @Controller
 @RequiredArgsConstructor
 
@@ -42,7 +44,7 @@ public class PostController {
         @NotBlank(message = "제목을 입력해주세요")
         @Size(min = 2, max = 10 , message = "2자 이상 10자 이하로 작성해주세요")
         private String title;
-        @NotBlank(message = "제목을 입력해주세요")
+        @NotBlank(message = "내용을 입력해주세요")
         @Size(min = 2, max = 100, message = "2자 이상 100자 이하로 작성해주세요.")
         private String content;
     }
@@ -54,11 +56,11 @@ public class PostController {
                         BindingResult bindingResult
     ) {
         if(bindingResult.hasErrors()) {
-            FieldError fieldError = bindingResult.getFieldError();
-            String errorFieldName = fieldError.getField();
-            String errorMessage = fieldError.getDefaultMessage();
 
-            return getWriteFormHtml(errorFieldName,errorMessage,writeform.getContent(),writeform.getTitle());
+            String errorFieldName = "title";
+            String errorMessage = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).collect(Collectors.joining("<br>"));
+
+            return getWriteFormHtml(errorFieldName,writeform.getTitle(),writeform.getContent(),errorMessage);
         }
 
         Post post = postService.write(writeform.title, writeform.content);
@@ -75,11 +77,11 @@ public class PostController {
         return """
                 <h1>%s</h1>
                 <form method="POST" action="doWrite">
-                  <input type="text" name="title" placeholder="제목" value="%s" autofocus>
-                  <br>
-                  <textarea name="content" placeholder="내용">%s</textarea>
-                  <br>
-                  <input type="submit" value="작성">
+                    <input type="text" name="title" placeholder="제목" value="%s" autofocus>
+                    <br>
+                    <textarea name="content" placeholder="내용">%s</textarea>
+                    <br>
+                    <input type="submit" value="작성">
                 </form>
                 
                 <script>
