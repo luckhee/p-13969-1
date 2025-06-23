@@ -3,7 +3,6 @@ package com.back.domain.post.post.controller;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,13 +37,17 @@ public class PostController {
             @RequestParam(defaultValue = "") String content
     ) {
         if( title.isBlank() ) {
-            return blankWrite("제목");
+            return getWriteFormHtml(title,content,"제목을 입력해주세요");
         } else if( content.isBlank() ) {
-            return blankWrite("내용");
+            return getWriteFormHtml(title,content,"내용을 입력해주세요");
         } else if( title.length() < 2 ) {
-            return "제목은 2글자 이상 입력해 주세요.";
-        } else if( content.length() < 5 ) {
-            return "내용은 5글자 이상 입력해 주세요.";
+            return getWriteFormHtml(title,content,"제목은 2글자 이상 입력해 주세요.");
+        } else if( content.length() < 2 ) {
+            return getWriteFormHtml(title,content,"내용은 2글자 이상 입력해 주세요.");
+        } else if( content.length() > 100 ) {
+            return getWriteFormHtml(title,content,"내용은 100글자 이하로 입력해 주세요.");
+        } else if( title.length() > 10 ) {
+            return getWriteFormHtml(title,content,"제목은 10글자 이하로 입력해 주세요.");
         }
 
 
@@ -53,18 +56,22 @@ public class PostController {
         return "%d번 글이 생성되었습니다.".formatted(post.getId());
     }
 
-    @GetMapping("/posts/blankwrite")
-    @ResponseBody
-    public String blankWrite(String blank) {
+
+    public String getWriteFormHtml() {
+        return getWriteFormHtml("","","");
+    }
+
+
+    public String getWriteFormHtml(String title, String content,String errorMessage) {
         return """
-                <h1>%s을 입력해 주세요</h1>
+                <h1>%s</h1>
                 <form method="POST" action="doWrite">
-                  <input type="text" name="title" placeholder="제목" value="">
+                  <input type="text" name="title" placeholder="제목" value="%s">
                   <br>
-                  <textarea name="content" placeholder="내용"></textarea>
+                  <textarea name="content" placeholder="내용">%s</textarea>
                   <br>
                   <input type="submit" value="작성">
                 </form>
-                """.formatted(blank);
+                """.formatted(errorMessage ,title, content);
     }
 }
