@@ -2,20 +2,21 @@ package com.back.domain.post.post.controller;
 
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
-@Validated
+
 public class PostController {
     private final PostService postService;
 
@@ -33,19 +34,22 @@ public class PostController {
                 """;
     }
 
+    @AllArgsConstructor
+    @Getter
+    public static class writeForm {
+        @NotBlank
+        @Size(min = 2, max = 10)
+        private String title;
+        @NotBlank
+        @Size(min = 2, max = 100)
+        private String content;
+    }
+
     @PostMapping("/posts/doWrite")
     @ResponseBody
     @Transactional
-    public String write(
-            @NotBlank
-            @Size(min = 2, max = 20)
-            @RequestParam(defaultValue = "") String title,
-
-            @NotBlank
-            @Size(min = 2, max = 100)
-            @RequestParam(defaultValue = "") String content
-    ) {
-        Post post = postService.write(title, content);
+    public String write(@Valid writeForm writeform) {
+        Post post = postService.write(writeform.title, writeform.content);
         return "%d번 글이 생성되었습니다.".formatted(post.getId());
     }
 
