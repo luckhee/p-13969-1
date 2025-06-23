@@ -14,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.stream.Collectors;
 
@@ -25,14 +24,13 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/posts/write")
-
-    public String showWrite() {
+    public String showWrite(WriteForm writeform) {
         return "post/post/write";
     }
 
     @AllArgsConstructor
     @Getter
-    public static class writeForm {
+    public static class WriteForm {
         @NotBlank(message = "1-제목을 입력해주세요")
         @Size(min = 2, max = 10 , message = "2-2자 이상 10자 이하로 작성해주세요")
         private String title;
@@ -42,9 +40,8 @@ public class PostController {
     }
 
     @PostMapping("/posts/doWrite")
-    @ResponseBody
     @Transactional
-    public String write(@Valid writeForm writeform,
+    public String write(@Valid WriteForm writeform,
                         BindingResult bindingResult,
                         Model model
     ) {
