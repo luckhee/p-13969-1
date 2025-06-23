@@ -57,7 +57,9 @@ public class PostController {
         if(bindingResult.hasErrors()) {
 
             String errorFieldName = "title";
-            String errorMessage = bindingResult.getFieldErrors().stream().map(fieldError -> fieldError.getField() + "-" + fieldError.getDefaultMessage()).collect(Collectors.joining("<br>"));
+            String errorMessage = bindingResult.getFieldErrors().stream().map(fieldError -> (fieldError.getField() + "-" + fieldError.getDefaultMessage()).split("-", 3))
+                    .map(field -> "<!--%s--><li data-error-field-name=\"%s\">%s</li>".formatted(field[1], field[0], field[2])).sorted()
+                    .collect(Collectors.joining("<br>"));
 
             return getWriteFormHtml(errorFieldName,writeform.getTitle(),writeform.getContent(),errorMessage);
         }
@@ -85,18 +87,19 @@ public class PostController {
                 
                 <script>
                     
-                    const errorFieldName = '%s';
+                    // 현재까지 나온 모든 폼 검색Add commentMore actions
+                    const forms = document.querySelectorAll('form');
+                    // 그 중에서 가장 마지막 폼 1개 찾기
+                    const lastForm = forms[forms.length - 1];
+                
+                    const errorFieldName = lastForm.previousElementSibling?.querySelector('li')?.dataset?.errorFieldName || '';
                     
                     if(errorFieldName.length > 0 ) {
-                        // 모든 폼을 다 긁어와
-                        const forms = document.querySelectorAll("form");
-                        // 마지막 폼
-                        const lastForm = forms[forms.length - 1];
-                        //focus
-                        lastForm[errorFieldName].focus();               
+                        lastForm[errorFieldName].focus();
+                
                     }
                 </script>
                 
-                """.formatted(errorMessage ,title, content, errorFieldName);
+                """.formatted(errorMessage ,title, content);
     }
 }
