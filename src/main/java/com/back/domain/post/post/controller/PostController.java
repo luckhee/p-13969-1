@@ -2,9 +2,12 @@ package com.back.domain.post.post.controller;
 
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
+@Validated
 public class PostController {
     private final PostService postService;
 
@@ -33,26 +37,15 @@ public class PostController {
     @ResponseBody
     @Transactional
     public String write(
+            @NotBlank
+            @Size(min = 2, max = 20)
             @RequestParam(defaultValue = "") String title,
+
+            @NotBlank
+            @Size(min = 2, max = 100)
             @RequestParam(defaultValue = "") String content
     ) {
-        if( title.isBlank() ) {
-            return getWriteFormHtml("title",title,content,"제목을 입력해주세요");
-        } else if( content.isBlank() ) {
-            return getWriteFormHtml("content",title,content,"내용을 입력해주세요");
-        } else if( title.length() < 2 ) {
-            return getWriteFormHtml("title",title,content,"제목은 2글자 이상 입력해 주세요.");
-        } else if( content.length() < 2 ) {
-            return getWriteFormHtml("content",title,content,"내용은 2글자 이상 입력해 주세요.");
-        } else if( content.length() > 100 ) {
-            return getWriteFormHtml("content",title,content,"내용은 100글자 이하로 입력해 주세요.");
-        } else if( title.length() > 10 ) {
-            return getWriteFormHtml("title",title,content,"제목은 10글자 이하로 입력해 주세요.");
-        }
-
-
         Post post = postService.write(title, content);
-
         return "%d번 글이 생성되었습니다.".formatted(post.getId());
     }
 
