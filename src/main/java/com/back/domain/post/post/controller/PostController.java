@@ -10,9 +10,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -38,16 +42,26 @@ public class PostController {
     }
 
     @PostMapping("/posts/doWrite")
+    @ResponseBody
     @Transactional
     public String write(@Valid writeForm writeform,
-                        BindingResult bindingResult
+                        BindingResult bindingResult,
+                        Model model
     ) {
         if(bindingResult.hasErrors()) {
+
+            String errorMessage = bindingResult.getFieldErrors().stream().map(fieldError -> (fieldError.getField() + "-" + fieldError.getDefaultMessage()).split("-", 3))
+                    .map(field -> "<!--%s--><li data-error-field-name=\"%s\">%s</li>".formatted(field[1], field[0], field[2])).sorted()
+                    .collect(Collectors.joining("\n"));
+
+            model.addAttribute("errorMessage", errorMessage);
             return "/post/post/write";
         }
 
         Post post = postService.write(writeform.title, writeform.content);
-        return "%d번 글이 생성되었습니다.".formatted(post.getId());
+
+        model.addAttribute("post", post);
+        return "post/post/writeDone";
     }
 
 }
